@@ -1,0 +1,2582 @@
+
+<html>
+  <link rel='stylesheet' type='text/css' href='frut.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <meta http-equiv='Content-Type' content='text/html;' charset='utf-8'/>
+  <script type='text/javascript' src='jquery.js'></script>
+  <script type='text/javascript' src='https://momentjs.com/downloads/moment-with-locales.min.js'></script>
+  <script language='javascript' type='text/javascript'>
+ 	function onOkClick(mode)
+	{
+		var date;
+		var newDate = new Date(document.getElementById('turfdate').value);
+		if(mode == 1)
+			date = document.getElementById('turfdate').value;
+		else if(mode == 2) {
+			date = moment(newDate).add(-1, 'days').format('YYYY-MM-DD');
+		} else if(mode == 3) {
+			date = moment(newDate).add(1, 'days').format('YYYY-MM-DD');
+        } else if(mode == 4) {
+          date = '';
+		} else
+			alert('Mode not supported yet :)');
+		
+        var dateString = '';
+        if (date != '') {
+          dateString = '&date=' + date;
+        }
+
+		var newLocation = 'today.php?userid=' + userid.value + dateString;
+        window.location.href = newLocation;
+	}
+	
+	function getLocalDate(utcDate) {
+		return moment.utc(utcDate).local().format('HH:mm:ss'); // YYYY-MM-DD
+	}
+	
+	function getUtcOffset() {
+	  var offset = moment().utcOffset() / 60;
+	  
+	  if (offset > 0)
+	    return '+' + offset;
+      else
+        return '-' + offset;
+	}
+  </script>
+  <head>
+    <style>
+      #map {
+        width: 1400px;
+        height: 1000px;
+        background-color: grey;
+      }
+    </style>
+	<title>Todays activity</title>
+  </head>
+  <body>
+    
+
+<script type='text/javascript' language='javascript'>
+  function myFunction() {
+    var x = document.getElementById('myTopnav');
+
+    if (x.className === 'topnav') {
+      x.className += ' responsive';
+    } else {
+      x.className = 'topnav';
+    }
+  }
+</script>
+
+<div class='topnav' id='myTopnav'>
+    <a href='index.php'> <!--class='active'>-->Frut</a>
+    <div class="dropdown">
+        <button class="dropbtn">Round Unique<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href='unika.php'>Classic "Omgångsunika"</a>
+            <a href="unika_monthly.php">Monthly toplist</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">Turf Missions<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="mission_events.php">Mission Log</a>
+            <a href="mission_list.php">Mission List</a>
+            <a href="mission.php">Current Mission</a>
+            <a href="mission_help.php">How to Play?</a>
+            <a href="mission_test.php">Experimental...</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">User Stats<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="user.php">User</a>
+            <a href="today.php">Today</a>
+            <a href="2day.php">2day</a>
+            <a href="user_round.php">Round Summary</a>
+            <a href="monthly.php">Monthly</a>
+            <a href="user_unique_ll.php">Unique turfers</a>
+            <a href="user_assists.php">Unique assists</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">Zone Stats<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href='zone.php'>Zone Stats</a>
+            <a href='new_zones.php'>New zones</a>
+            <a href='zone_regtop.php'>Toplist: Zones per region</a>
+            <a href='takestoday.php'>Toplist: Zones taken today</a>
+        </div>
+    </div>
+    <a href='about.php'>About</a>
+    <a href='swish.php'>Donate</a>
+    <a href='settings.php'>Settings</a>
+    <a href='settings.php'>[GW007]</a>
+    <a href='javascript:void(0);' class='icon' onclick='myFunction()'>
+        <i class='fa fa-bars'></i>
+  </a>
+</div>
+    <div class='main' style='padding-top:8px; padding-left:8px'>
+        <label for='userid'>Turf alias:</label>
+        <input type='text' name='userid' id='userid' onkeydown='if (event.keyCode == 13) return onOkClick(1);' value='GW007'>
+        <label for='turfdate'>Date:</label>
+        <input type='date' id='turfdate' name='turfdate' min='2017-04-02 max='' value='2021-06-07'>
+        <input type='button' value='OK' onclick='return onOkClick(1);' style='width:60px; height:20px;'>
+        <input type='button' value='<' onclick='return onOkClick(2);' style='width:20px; height:20px;'>
+        <input type='button' value='>' onclick='return onOkClick(3);' style='width:20px; height:20px;'>
+        <input type='button' value='Today' onclick='return onOkClick(4);' style='width:60px; height:20px;'>
+        <br><br>
+
+
+      <table class='miscTable'>
+        <thead>
+          <tr>
+             <th align='left' width='110'>Date (UTC<script>document.write(getUtcOffset());</script>)</th>
+             <th align='left'>Eager time</th>
+             <th width='130' align='left'>Zone name</th>
+             <th width='130' align='left'>Area name</th>
+             <th align='right'>TP</th>
+             <th width='50' style='padding-left:10px' align='left'>PPH</th>
+             <th width='50' align='left'>Activity</th>
+             <th width='150' align='left'>Affected turfer</th>
+             <th>Take</th>
+         </tr>
+       </thead>
+
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 04:15:31'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ToWalkOrMove'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=50841&roundid=133'>ToWalkOrMove</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Baskan'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Baskan&date=2021-06-07'>Baskan</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 04:18:42'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/SinnenasPark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=139179&roundid=133'>SinnenasPark</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Baskan'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Baskan&date=2021-06-07'>Baskan</a></td>
+		   <td></td>
+         </tr>
+<tr><td><b><hr></b></td><td><hr></td><td><b>New session!</b></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td></tr>          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 04:57:01'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KingSquare'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=949&roundid=133'>KingSquare</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Gallant'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Gallant&date=2021-06-07'>Gallant</a></td>
+		   <td>1</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 04:58:16'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Fyllerimaskin'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=148710&roundid=133'>Fyllerimaskin</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Gallant'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Gallant&date=2021-06-07'>Gallant</a></td>
+		   <td>2</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 04:59:53'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Bragebron'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=11882&roundid=133'>Bragebron</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td>3</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:01:27'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ThorGravy'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74405&roundid=133'>ThorGravy</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/myffe'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=myffe&date=2021-06-07'>myffe</a></td>
+		   <td>4</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:03:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Giraffen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2851&roundid=133'>Giraffen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/myffe'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=myffe&date=2021-06-07'>myffe</a></td>
+		   <td>5</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:05:10'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ThorSauce'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=12059&roundid=133'>ThorSauce</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/myffe'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=myffe&date=2021-06-07'>myffe</a></td>
+		   <td>6</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:06:27'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/CalmareYards'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=34628&roundid=133'>CalmareYards</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/myffe'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=myffe&date=2021-06-07'>myffe</a></td>
+		   <td>7</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:07:47'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/TågKalle'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=9694&roundid=133'>TågKalle</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/myffe'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=myffe&date=2021-06-07'>myffe</a></td>
+		   <td>8</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:09:40'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Svaneberg'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298527&roundid=133'>Svaneberg</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>9</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:11:34'));</script></td>
+            <td>14:33</td>
+		    <td><a href='https://www.turfgame.com/zone/MittISmeten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25769&roundid=133'>MittISmeten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>10</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:13:55'));</script></td>
+            <td>15:39</td>
+		    <td><a href='https://www.turfgame.com/zone/GamlaMuren'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298523&roundid=133'>GamlaMuren</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>11</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:15:54'));</script></td>
+            <td>16:01</td>
+		    <td><a href='https://www.turfgame.com/zone/Törneby'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298522&roundid=133'>Törneby</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>12</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:18:18'));</script></td>
+            <td>16:51</td>
+		    <td><a href='https://www.turfgame.com/zone/NästanRakt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25772&roundid=133'>NästanRakt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>13</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:20:15'));</script></td>
+            <td>16:57</td>
+		    <td><a href='https://www.turfgame.com/zone/Smedbyvägen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25774&roundid=133'>Smedbyvägen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>14</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:21:59'));</script></td>
+            <td>16:49</td>
+		    <td><a href='https://www.turfgame.com/zone/Dokumentet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298521&roundid=133'>Dokumentet</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>15</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:23:39'));</script></td>
+            <td>17:12</td>
+		    <td><a href='https://www.turfgame.com/zone/MotKalmar'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25775&roundid=133'>MotKalmar</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>16</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:25:15'));</script></td>
+            <td>17:28</td>
+		    <td><a href='https://www.turfgame.com/zone/Smedbykilen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298520&roundid=133'>Smedbykilen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>17</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:27:04'));</script></td>
+            <td>17:24</td>
+		    <td><a href='https://www.turfgame.com/zone/UnderRäls'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25778&roundid=133'>UnderRäls</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>18</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:28:45'));</script></td>
+            <td>17:11</td>
+		    <td><a href='https://www.turfgame.com/zone/Blåklinten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25796&roundid=133'>Blåklinten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>19</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:30:26'));</script></td>
+            <td>16:31</td>
+		    <td><a href='https://www.turfgame.com/zone/Backlilja'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25888&roundid=133'>Backlilja</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>20</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:32:44'));</script></td>
+            <td>16:50</td>
+		    <td><a href='https://www.turfgame.com/zone/GameSetSune'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=27977&roundid=133'>GameSetSune</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>21</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:33:01'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Fyllerimaskin'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=148710&roundid=133'>Fyllerimaskin</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/zilversurf'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=zilversurf&date=2021-06-07'>zilversurf</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:35:14'));</script></td>
+            <td>16:56</td>
+		    <td><a href='https://www.turfgame.com/zone/Krikonmöte'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25795&roundid=133'>Krikonmöte</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td>22</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:36:30'));</script></td>
+            <td>16:15</td>
+		    <td><a href='https://www.turfgame.com/zone/Kläckaren'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44697&roundid=133'>Kläckaren</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>23</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:38:19'));</script></td>
+            <td>16:20</td>
+		    <td><a href='https://www.turfgame.com/zone/Shufflepipe'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=27058&roundid=133'>Shufflepipe</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>24</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:39:43'));</script></td>
+            <td>16:04</td>
+		    <td><a href='https://www.turfgame.com/zone/Stenröset'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25797&roundid=133'>Stenröset</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>25</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:42:23'));</script></td>
+            <td>17:08</td>
+		    <td><a href='https://www.turfgame.com/zone/Klapper'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25793&roundid=133'>Klapper</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>26</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:43:47'));</script></td>
+            <td>16:43</td>
+		    <td><a href='https://www.turfgame.com/zone/Tingby'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44700&roundid=133'>Tingby</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>27</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:44:56'));</script></td>
+            <td>16:11</td>
+		    <td><a href='https://www.turfgame.com/zone/Stenis'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44699&roundid=133'>Stenis</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>28</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 05:46:35'));</script></td>
+            <td>16:09</td>
+		    <td><a href='https://www.turfgame.com/zone/OdlingParker'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25889&roundid=133'>OdlingParker</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>29</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:19:40'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KingSquare'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=949&roundid=133'>KingSquare</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Gallant'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Gallant&date=2021-06-07'>Gallant</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:31:58'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GameSetSune'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=27977&roundid=133'>GameSetSune</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:34:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Krikonmöte'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25795&roundid=133'>Krikonmöte</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:35:35'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Kläckaren'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44697&roundid=133'>Kläckaren</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:37:15'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Shufflepipe'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=27058&roundid=133'>Shufflepipe</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:39:50'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Klapper'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25793&roundid=133'>Klapper</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:41:09'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Tingby'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44700&roundid=133'>Tingby</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:42:16'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Stenis'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44699&roundid=133'>Stenis</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:43:59'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OdlingParker'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25889&roundid=133'>OdlingParker</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:46:11'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Stenröset'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25797&roundid=133'>Stenröset</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:50:25'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Backlilja'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25888&roundid=133'>Backlilja</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:51:54'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Blåklinten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25796&roundid=133'>Blåklinten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:53:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/UnderRäls'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25778&roundid=133'>UnderRäls</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:55:14'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Smedbykilen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298520&roundid=133'>Smedbykilen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:56:37'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MotKalmar'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25775&roundid=133'>MotKalmar</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:58:10'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Dokumentet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298521&roundid=133'>Dokumentet</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 06:59:32'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Smedbyvägen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25774&roundid=133'>Smedbyvägen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:01:11'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/NästanRakt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25772&roundid=133'>NästanRakt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:03:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Törneby'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298522&roundid=133'>Törneby</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:05:01'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GamlaMuren'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298523&roundid=133'>GamlaMuren</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:07:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MittISmeten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25769&roundid=133'>MittISmeten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:09:02'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Svaneberg'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298527&roundid=133'>Svaneberg</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:11:04'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/TågKalle'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=9694&roundid=133'>TågKalle</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:12:00'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Margareta'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=953&roundid=133'>Margareta</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:12:09'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/CalmareYards'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=34628&roundid=133'>CalmareYards</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:13:14'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ThorSauce'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=12059&roundid=133'>ThorSauce</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:15:10'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Giraffen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2851&roundid=133'>Giraffen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:16:37'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ThorGravy'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74405&roundid=133'>ThorGravy</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:18:38'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Bragebron'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=11882&roundid=133'>Bragebron</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:22:06'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ParkForPeople'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=12063&roundid=133'>ParkForPeople</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:23:33'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Broslätt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=23984&roundid=133'>Broslätt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:31:17'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GallowHill'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=43234&roundid=133'>GallowHill</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:33:30'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/JungZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2080&roundid=133'>JungZone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:34:56'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Åbranden'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=50898&roundid=133'>Åbranden</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:35:52'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/VesholmStåt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25765&roundid=133'>VesholmStåt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:36:58'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Vesholm'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=42465&roundid=133'>Vesholm</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 07:38:27'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OldRailway'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25766&roundid=133'>OldRailway</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:09:04'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/FalconField'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=1752&roundid=133'>FalconField</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:11:28'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Sjöfalken'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=224795&roundid=133'>Sjöfalken</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:13:15'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/SiljeFalcon'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=34707&roundid=133'>SiljeFalcon</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:15:22'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KalmarWoods'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=9693&roundid=133'>KalmarWoods</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:40:32'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Magganplan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19320&roundid=133'>Magganplan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:41:23'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/LillegårdZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=23398&roundid=133'>LillegårdZone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:42:37'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/VikingTurf'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74416&roundid=133'>VikingTurf</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:43:56'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Lillvikenbron'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=21711&roundid=133'>Lillvikenbron</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:55:11'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Lillviken'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19319&roundid=133'>Lillviken</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:56:23'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GWsGuldpärla'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=46364&roundid=133'>GWsGuldpärla</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:57:39'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/SundStone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19317&roundid=133'>SundStone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:58:34'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/4Hagen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=21712&roundid=133'>4Hagen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 08:59:30'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/SundPath'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74413&roundid=133'>SundPath</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:00:26'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Sundpark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=952&roundid=133'>Sundpark</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:01:50'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ThroneOfSune'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=22702&roundid=133'>ThroneOfSune</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:03:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/NoHolyPath'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74414&roundid=133'>NoHolyPath</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:04:32'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/CalmGustaf'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2846&roundid=133'>CalmGustaf</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:05:47'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/BritaJohan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74415&roundid=133'>BritaJohan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td></td>
+         </tr>
+<tr><td><b>E: 03:51:54</b></td><td><hr></td><td><b>New session!</b></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td></tr>          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:38:29'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Stenis'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44699&roundid=133'>Stenis</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>1</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:39:49'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Tingby'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44700&roundid=133'>Tingby</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>2</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:41:11'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Klapper'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25793&roundid=133'>Klapper</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>3</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:43:37'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Shufflepipe'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=27058&roundid=133'>Shufflepipe</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>4</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:44:58'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Kläckaren'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44697&roundid=133'>Kläckaren</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>5</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:46:34'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Stenröset'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25797&roundid=133'>Stenröset</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>6</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 09:48:09'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OdlingParker'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25889&roundid=133'>OdlingParker</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>7</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 10:11:51'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Kläckaren'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44697&roundid=133'>Kläckaren</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 10:15:24'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Shufflepipe'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=27058&roundid=133'>Shufflepipe</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 10:17:27'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Stenröset'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25797&roundid=133'>Stenröset</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 10:22:34'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Klapper'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25793&roundid=133'>Klapper</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 10:24:47'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Tingby'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44700&roundid=133'>Tingby</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 10:26:16'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Stenis'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44699&roundid=133'>Stenis</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 10:29:05'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OdlingParker'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25889&roundid=133'>OdlingParker</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 11:04:38'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/StureSten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=23399&roundid=133'>StureSten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 11:12:12'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/SteelHold'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2850&roundid=133'>SteelHold</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/MiaWeb49'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=MiaWeb49&date=2021-06-07'>MiaWeb49</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 13:11:14'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/SödraKolonien'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=34643&roundid=133'>SödraKolonien</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 13:13:58'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/StoneHome'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=12486&roundid=133'>StoneHome</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 13:17:00'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/VarÄrSissela'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=278538&roundid=133'>VarÄrSissela</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:03:48'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Lasarettet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=1829&roundid=133'>Lasarettet</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Mossetomten'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Mossetomten&date=2021-06-07'>Mossetomten</a></td>
+		   <td></td>
+         </tr>
+<tr><td><b>E: 04:44:17</b></td><td><hr></td><td><b>New session!</b></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td></tr>          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:32:26'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OdlingParker'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25889&roundid=133'>OdlingParker</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td>1</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:34:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Kroppkakan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25794&roundid=133'>Kroppkakan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/SmedbyLady'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=SmedbyLady&date=2021-06-07'>SmedbyLady</a></td>
+		   <td>2</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:35:45'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Krikonmöte'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25795&roundid=133'>Krikonmöte</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>3</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:37:47'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GameSetSune'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=27977&roundid=133'>GameSetSune</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>4</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:39:52'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Backlilja'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25888&roundid=133'>Backlilja</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>5</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:41:24'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Blåklinten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25796&roundid=133'>Blåklinten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>6</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:42:40'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/UnderRäls'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25778&roundid=133'>UnderRäls</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>7</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:44:36'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Smedbykilen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298520&roundid=133'>Smedbykilen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>8</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:46:06'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MotKalmar'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25775&roundid=133'>MotKalmar</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>9</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:47:40'));</script></td>
+            <td>15:14</td>
+		    <td><a href='https://www.turfgame.com/zone/Dokumentet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298521&roundid=133'>Dokumentet</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>10</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:48:59'));</script></td>
+            <td>14:41</td>
+		    <td><a href='https://www.turfgame.com/zone/Smedbyvägen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25774&roundid=133'>Smedbyvägen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>11</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:50:37'));</script></td>
+            <td>14:52</td>
+		    <td><a href='https://www.turfgame.com/zone/NästanRakt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25772&roundid=133'>NästanRakt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>12</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:53:06'));</script></td>
+            <td>15:19</td>
+		    <td><a href='https://www.turfgame.com/zone/Törneby'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298522&roundid=133'>Törneby</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>13</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:54:55'));</script></td>
+            <td>15:03</td>
+		    <td><a href='https://www.turfgame.com/zone/GamlaMuren'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298523&roundid=133'>GamlaMuren</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Assa1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Assa1&date=2021-06-07'>Assa1</a></td>
+		   <td>14</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:57:20'));</script></td>
+            <td>15:56</td>
+		    <td><a href='https://www.turfgame.com/zone/MittISmeten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25769&roundid=133'>MittISmeten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/ovalfyrkant'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=ovalfyrkant&date=2021-06-07'>ovalfyrkant</a></td>
+		   <td>15</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 14:59:43'));</script></td>
+            <td>17:03</td>
+		    <td><a href='https://www.turfgame.com/zone/HagbynäsVäg'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25768&roundid=133'>HagbynäsVäg</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>16</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:01:29'));</script></td>
+            <td>16:53</td>
+		    <td><a href='https://www.turfgame.com/zone/MotDämmet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=220697&roundid=133'>MotDämmet</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>17</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:02:42'));</script></td>
+            <td>16:36</td>
+		    <td><a href='https://www.turfgame.com/zone/OldRailway'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25766&roundid=133'>OldRailway</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td>18</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:04:10'));</script></td>
+            <td>16:30</td>
+		    <td><a href='https://www.turfgame.com/zone/Vesholm'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=42465&roundid=133'>Vesholm</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td>19</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:05:21'));</script></td>
+            <td>16:22</td>
+		    <td><a href='https://www.turfgame.com/zone/VesholmStåt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25765&roundid=133'>VesholmStåt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>20</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:06:47'));</script></td>
+            <td>16:10</td>
+		    <td><a href='https://www.turfgame.com/zone/SiljeFalcon'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=34707&roundid=133'>SiljeFalcon</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td>21</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:08:26'));</script></td>
+            <td>15:20</td>
+		    <td><a href='https://www.turfgame.com/zone/KalmarWoods'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=9693&roundid=133'>KalmarWoods</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td>22</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:09:57'));</script></td>
+            <td>15:02</td>
+		    <td><a href='https://www.turfgame.com/zone/Åbranden'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=50898&roundid=133'>Åbranden</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td>23</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:11:32'));</script></td>
+            <td>14:12</td>
+		    <td><a href='https://www.turfgame.com/zone/JungZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2080&roundid=133'>JungZone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Fredrick'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Fredrick&date=2021-06-07'>Fredrick</a></td>
+		   <td>24</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:13:50'));</script></td>
+            <td>14:07</td>
+		    <td><a href='https://www.turfgame.com/zone/GallowHill'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=43234&roundid=133'>GallowHill</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td>25</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:15:44'));</script></td>
+            <td>14:15</td>
+		    <td><a href='https://www.turfgame.com/zone/Broslätt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=23984&roundid=133'>Broslätt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Charlez'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Charlez&date=2021-06-07'>Charlez</a></td>
+		   <td>26</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:17:28'));</script></td>
+            <td>14:46</td>
+		    <td><a href='https://www.turfgame.com/zone/ParkForPeople'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=12063&roundid=133'>ParkForPeople</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/MiaWeb49'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=MiaWeb49&date=2021-06-07'>MiaWeb49</a></td>
+		   <td>27</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:19:21'));</script></td>
+            <td>15:11</td>
+		    <td><a href='https://www.turfgame.com/zone/FalconField'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=1752&roundid=133'>FalconField</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Snabelanna'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Snabelanna&date=2021-06-07'>Snabelanna</a></td>
+		   <td>28</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:20:50'));</script></td>
+            <td>15:29</td>
+		    <td><a href='https://www.turfgame.com/zone/SteelHold'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2850&roundid=133'>SteelHold</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>29</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:22:08'));</script></td>
+            <td>15:21</td>
+		    <td><a href='https://www.turfgame.com/zone/VarÄrSissela'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=278538&roundid=133'>VarÄrSissela</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>30</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:23:17'));</script></td>
+            <td>14:51</td>
+		    <td><a href='https://www.turfgame.com/zone/Margareta'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=953&roundid=133'>Margareta</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>31</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:24:57'));</script></td>
+            <td>15:00</td>
+		    <td><a href='https://www.turfgame.com/zone/StoneHome'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=12486&roundid=133'>StoneHome</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>32</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:26:35'));</script></td>
+            <td>15:03</td>
+		    <td><a href='https://www.turfgame.com/zone/SödraKolonien'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=34643&roundid=133'>SödraKolonien</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>33</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:28:10'));</script></td>
+            <td>14:20</td>
+		    <td><a href='https://www.turfgame.com/zone/Lillvikenbron'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=21711&roundid=133'>Lillvikenbron</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>34</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:29:59'));</script></td>
+            <td>14:15</td>
+		    <td><a href='https://www.turfgame.com/zone/GrimField'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74417&roundid=133'>GrimField</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>35</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:31:09'));</script></td>
+            <td>13:41</td>
+		    <td><a href='https://www.turfgame.com/zone/Flundran'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=23983&roundid=133'>Flundran</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>36</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:32:31'));</script></td>
+            <td>13:10</td>
+		    <td><a href='https://www.turfgame.com/zone/Lillviken'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19319&roundid=133'>Lillviken</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>37</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:33:55'));</script></td>
+            <td>13:05</td>
+		    <td><a href='https://www.turfgame.com/zone/GWsGuldpärla'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=46364&roundid=133'>GWsGuldpärla</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>38</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:35:15'));</script></td>
+            <td>13:07</td>
+		    <td><a href='https://www.turfgame.com/zone/SundStone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19317&roundid=133'>SundStone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>39</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:35:51'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/UnderRäls'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25778&roundid=133'>UnderRäls</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:36:19'));</script></td>
+            <td>13:02</td>
+		    <td><a href='https://www.turfgame.com/zone/4Hagen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=21712&roundid=133'>4Hagen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>40</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:37:34'));</script></td>
+            <td>12:37</td>
+		    <td><a href='https://www.turfgame.com/zone/SundPath'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74413&roundid=133'>SundPath</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>41</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:38:29'));</script></td>
+            <td>11:54</td>
+		    <td><a href='https://www.turfgame.com/zone/Sundpark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=952&roundid=133'>Sundpark</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>42</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:38:46'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Smedbykilen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298520&roundid=133'>Smedbykilen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:39:57'));</script></td>
+            <td>11:47</td>
+		    <td><a href='https://www.turfgame.com/zone/ThroneOfSune'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=22702&roundid=133'>ThroneOfSune</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>43</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:40:29'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MotKalmar'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25775&roundid=133'>MotKalmar</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:42:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Dokumentet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298521&roundid=133'>Dokumentet</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:42:54'));</script></td>
+            <td>12:55</td>
+		    <td><a href='https://www.turfgame.com/zone/NoHolyPath'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74414&roundid=133'>NoHolyPath</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td>44</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:43:54'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Smedbyvägen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25774&roundid=133'>Smedbyvägen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:44:11'));</script></td>
+            <td>13:02</td>
+		    <td><a href='https://www.turfgame.com/zone/CalmGustaf'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2846&roundid=133'>CalmGustaf</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>45</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:45:23'));</script></td>
+            <td>12:52</td>
+		    <td><a href='https://www.turfgame.com/zone/BritaJohan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74415&roundid=133'>BritaJohan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>46</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:46:29'));</script></td>
+            <td>12:34</td>
+		    <td><a href='https://www.turfgame.com/zone/Magganplan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19320&roundid=133'>Magganplan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>47</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:47:36'));</script></td>
+            <td>12:21</td>
+		    <td><a href='https://www.turfgame.com/zone/LillegårdZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=23398&roundid=133'>LillegårdZone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td>48</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:49:20'));</script></td>
+            <td>13:01</td>
+		    <td><a href='https://www.turfgame.com/zone/StureSten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=23399&roundid=133'>StureSten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>49</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:50:38'));</script></td>
+            <td>13:04</td>
+		    <td><a href='https://www.turfgame.com/zone/VikingTurf'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74416&roundid=133'>VikingTurf</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>50</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:52:32'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/VarÄrSissela'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=278538&roundid=133'>VarÄrSissela</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/guldgossen'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=guldgossen&date=2021-06-07'>guldgossen</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 15:53:56'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Margareta'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=953&roundid=133'>Margareta</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/guldgossen'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=guldgossen&date=2021-06-07'>guldgossen</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 16:03:46'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Backlilja'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25888&roundid=133'>Backlilja</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 16:05:40'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Blåklinten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25796&roundid=133'>Blåklinten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 16:07:45'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GameSetSune'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=27977&roundid=133'>GameSetSune</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 16:11:12'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Krikonmöte'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25795&roundid=133'>Krikonmöte</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 16:39:58'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OdlingParker'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25889&roundid=133'>OdlingParker</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 16:46:28'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Sundpark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=952&roundid=133'>Sundpark</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/guldgossen'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=guldgossen&date=2021-06-07'>guldgossen</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 16:51:28'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/CalmGustaf'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2846&roundid=133'>CalmGustaf</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/guldgossen'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=guldgossen&date=2021-06-07'>guldgossen</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 16:53:03'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Magganplan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19320&roundid=133'>Magganplan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/guldgossen'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=guldgossen&date=2021-06-07'>guldgossen</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 17:02:19'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Kroppkakan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25794&roundid=133'>Kroppkakan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Froda'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Froda&date=2021-06-07'>Froda</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 17:52:37'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Wahlen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=44313&roundid=133'>Wahlen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Assa1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Assa1&date=2021-06-07'>Assa1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 18:02:31'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GrimField'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74417&roundid=133'>GrimField</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Assa1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Assa1&date=2021-06-07'>Assa1</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 19:22:38'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/StoneHome'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=12486&roundid=133'>StoneHome</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Mossetomten'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Mossetomten&date=2021-06-07'>Mossetomten</a></td>
+		   <td></td>
+         </tr>
+<tr><td><b>E: 04:25:28</b></td><td><hr></td><td><b>New session!</b></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td><td><hr></td></tr>          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:16:06'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Magganplan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19320&roundid=133'>Magganplan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/guldgossen'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=guldgossen&date=2021-06-07'>guldgossen</a></td>
+		   <td>1</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:17:38'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Margareta'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=953&roundid=133'>Margareta</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Mossetomten'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Mossetomten&date=2021-06-07'>Mossetomten</a></td>
+		   <td>2</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:19:25'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Fyllerimaskin'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=148710&roundid=133'>Fyllerimaskin</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/MiaWeb49'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=MiaWeb49&date=2021-06-07'>MiaWeb49</a></td>
+		   <td>3</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:20:37'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KingSquare'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=949&roundid=133'>KingSquare</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Gallant'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Gallant&date=2021-06-07'>Gallant</a></td>
+		   <td>4</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:22:11'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Gladan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19321&roundid=133'>Gladan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Mossetomten'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Mossetomten&date=2021-06-07'>Mossetomten</a></td>
+		   <td>5</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:23:15'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/VästraStation'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74404&roundid=133'>VästraStation</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>6</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:24:20'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MalmSquare'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=950&roundid=133'>MalmSquare</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Mossetomten'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Mossetomten&date=2021-06-07'>Mossetomten</a></td>
+		   <td>7</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:25:46'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Smålandsskytt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=24190&roundid=133'>Smålandsskytt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Mossetomten'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Mossetomten&date=2021-06-07'>Mossetomten</a></td>
+		   <td>8</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:26:59'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/RadioZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=1593&roundid=133'>RadioZone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>9</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:28:23'));</script></td>
+            <td>12:17</td>
+		    <td><a href='https://www.turfgame.com/zone/DriveSchool'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19315&roundid=133'>DriveSchool</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Mossetomten'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Mossetomten&date=2021-06-07'>Mossetomten</a></td>
+		   <td>10</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:30:08'));</script></td>
+            <td>12:30</td>
+		    <td><a href='https://www.turfgame.com/zone/Magistern'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=50663&roundid=133'>Magistern</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td>11</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:31:18'));</script></td>
+            <td>11:53</td>
+		    <td><a href='https://www.turfgame.com/zone/SomJutet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=9702&roundid=133'>SomJutet</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/ovalfyrkant'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=ovalfyrkant&date=2021-06-07'>ovalfyrkant</a></td>
+		   <td>12</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:32:37'));</script></td>
+            <td>12:00</td>
+		    <td><a href='https://www.turfgame.com/zone/Bonanza2016'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=74403&roundid=133'>Bonanza2016</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Jagdpanther'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Jagdpanther&date=2021-06-07'>Jagdpanther</a></td>
+		   <td>13</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:33:47'));</script></td>
+            <td>11:36</td>
+		    <td><a href='https://www.turfgame.com/zone/Stagg'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19325&roundid=133'>Stagg</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>14</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:34:53'));</script></td>
+            <td>11:38</td>
+		    <td><a href='https://www.turfgame.com/zone/Sveaplan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=947&roundid=133'>Sveaplan</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>15</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:36:02'));</script></td>
+            <td>11:42</td>
+		    <td><a href='https://www.turfgame.com/zone/KingeninGate'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=9821&roundid=133'>KingeninGate</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>16</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:37:36'));</script></td>
+            <td>11:50</td>
+		    <td><a href='https://www.turfgame.com/zone/Kaggen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=34620&roundid=133'>Kaggen</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>17</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:38:51'));</script></td>
+            <td>11:52</td>
+		    <td><a href='https://www.turfgame.com/zone/Larmtorget'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=1595&roundid=133'>Larmtorget</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>65</td>
+		    <td style='padding-left:10px' align='left'>+9</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>18</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:39:45'));</script></td>
+            <td>11:22</td>
+		    <td><a href='https://www.turfgame.com/zone/KalmarCentral'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25783&roundid=133'>KalmarCentral</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Calmare1'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Calmare1&date=2021-06-07'>Calmare1</a></td>
+		   <td>19</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:41:19'));</script></td>
+            <td>11:11</td>
+		    <td><a href='https://www.turfgame.com/zone/CalmBaron'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=1889&roundid=133'>CalmBaron</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>20</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:42:52'));</script></td>
+            <td>11:34</td>
+		    <td><a href='https://www.turfgame.com/zone/GW007Gästhamn'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=60197&roundid=133'>GW007Gästhamn</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>21</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:44:43'));</script></td>
+            <td>12:06</td>
+		    <td><a href='https://www.turfgame.com/zone/SeKalmarSlott'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=21773&roundid=133'>SeKalmarSlott</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>22</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:46:04'));</script></td>
+            <td>12:17</td>
+		    <td><a href='https://www.turfgame.com/zone/Sylvander'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=946&roundid=133'>Sylvander</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>23</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:47:51'));</script></td>
+            <td>12:58</td>
+		    <td><a href='https://www.turfgame.com/zone/KingeninHeart'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=16502&roundid=133'>KingeninHeart</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>24</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:49:13'));</script></td>
+            <td>13:11</td>
+		    <td><a href='https://www.turfgame.com/zone/KalmarSlott'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=945&roundid=133'>KalmarSlott</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>25</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:50:46'));</script></td>
+            <td>13:10</td>
+		    <td><a href='https://www.turfgame.com/zone/RoyalCalmare1'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=51961&roundid=133'>RoyalCalmare1</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>26</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:53:19'));</script></td>
+            <td>14:28</td>
+		    <td><a href='https://www.turfgame.com/zone/OldKalmar'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19323&roundid=133'>OldKalmar</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>27</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:54:34'));</script></td>
+            <td>14:49</td>
+		    <td><a href='https://www.turfgame.com/zone/GouldZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=19326&roundid=133'>GouldZone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>80</td>
+		    <td style='padding-left:10px' align='left'>+8</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/moskalmar'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=moskalmar&date=2021-06-07'>moskalmar</a></td>
+		   <td>28</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:56:07'));</script></td>
+            <td>14:48</td>
+		    <td><a href='https://www.turfgame.com/zone/CalmGustaf'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2846&roundid=133'>CalmGustaf</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/guldgossen'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=guldgossen&date=2021-06-07'>guldgossen</a></td>
+		   <td>29</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:57:52'));</script></td>
+            <td>15:00</td>
+		    <td><a href='https://www.turfgame.com/zone/Sundpark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=952&roundid=133'>Sundpark</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/guldgossen'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=guldgossen&date=2021-06-07'>guldgossen</a></td>
+		   <td>30</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 20:59:00'));</script></td>
+            <td>14:17</td>
+		    <td><a href='https://www.turfgame.com/zone/Demonized'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=48079&roundid=133'>Demonized</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='lightgreen'>Takeover</td>
+		    <td><a href='https://www.turfgame.com/user/Podde'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Podde&date=2021-06-07'>Podde</a></td>
+		   <td>31</td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:34:20'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/HagbynäsVäg'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25768&roundid=133'>HagbynäsVäg</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:35:53'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MotDämmet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=220697&roundid=133'>MotDämmet</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:37:01'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OldRailway'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25766&roundid=133'>OldRailway</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:38:26'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Vesholm'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=42465&roundid=133'>Vesholm</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:39:31'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/VesholmStåt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25765&roundid=133'>VesholmStåt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>95</td>
+		    <td style='padding-left:10px' align='left'>+7</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:41:30'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KalmarWoods'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=9693&roundid=133'>KalmarWoods</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:42:45'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Åbranden'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=50898&roundid=133'>Åbranden</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:44:16'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/JungZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=2080&roundid=133'>JungZone</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>110</td>
+		    <td style='padding-left:10px' align='left'>+6</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:49:34'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MittISmeten'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25769&roundid=133'>MittISmeten</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:51:58'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GamlaMuren'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298523&roundid=133'>GamlaMuren</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:53:41'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Törneby'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=298522&roundid=133'>Törneby</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-06-07 22:55:55'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/NästanRakt'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=25772&roundid=133'>NästanRakt</a></td>
+	 	    <td align='left'>Kalmar kommun</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Helge70'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Helge70&date=2021-06-07'>Helge70</a></td>
+		   <td></td>
+         </tr>
+<tr><td><b>E: 955:04:36</b></td><td><hr></td><td><b>Session Finished!</b></td><td><hr></td><td><hr></td><td><hr></td><td><hr></hr></td><td><hr></td><td><hr></td></tr>          <tr>
+            <th align='left'></th>
+            <th align='left'></th>
+            <th align='left'></th>
+            <th align='left'>Average TP</th>
+            <th align='right'>114</th>
+            <th style='padding-left:10px' align='left'></th>
+		    <th align='left'></th>
+            <th align='left'>Zones taken:</th>
+            <th>117</th>
+	    </tr>
+      </table>
+      <br>
+      <table>
+	    <tr><td><b>Assists:</b></td><td>0</td></tr>
+	    <tr><td><b>Revisits:</b></td><td>0</td></tr>
+	    <tr><td><b>Lost:</b></td><td>102</td></tr>
+	    <tr><td><b>Neutralized zones:</b></td><td>0</td></tr>
+	    <tr><td><b>Total takepoints:</b></td><td>13245</td></tr>
+	 </table>
+   </div>
+  </body>
+</html>

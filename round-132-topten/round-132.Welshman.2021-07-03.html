@@ -1,0 +1,822 @@
+
+<html>
+  <link rel='stylesheet' type='text/css' href='frut.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <meta http-equiv='Content-Type' content='text/html;' charset='utf-8'/>
+  <script type='text/javascript' src='jquery.js'></script>
+  <script type='text/javascript' src='https://momentjs.com/downloads/moment-with-locales.min.js'></script>
+  <script language='javascript' type='text/javascript'>
+ 	function onOkClick(mode)
+	{
+		var date;
+		var newDate = new Date(document.getElementById('turfdate').value);
+		if(mode == 1)
+			date = document.getElementById('turfdate').value;
+		else if(mode == 2) {
+			date = moment(newDate).add(-1, 'days').format('YYYY-MM-DD');
+		} else if(mode == 3) {
+			date = moment(newDate).add(1, 'days').format('YYYY-MM-DD');
+        } else if(mode == 4) {
+          date = '';
+		} else
+			alert('Mode not supported yet :)');
+		
+        var dateString = '';
+        if (date != '') {
+          dateString = '&date=' + date;
+        }
+
+		var newLocation = 'today.php?userid=' + userid.value + dateString;
+        window.location.href = newLocation;
+	}
+	
+	function getLocalDate(utcDate) {
+		return moment.utc(utcDate).local().format('HH:mm:ss'); // YYYY-MM-DD
+	}
+	
+	function getUtcOffset() {
+	  var offset = moment().utcOffset() / 60;
+	  
+	  if (offset > 0)
+	    return '+' + offset;
+      else
+        return '-' + offset;
+	}
+  </script>
+  <head>
+    <style>
+      #map {
+        width: 1400px;
+        height: 1000px;
+        background-color: grey;
+      }
+    </style>
+	<title>Todays activity</title>
+  </head>
+  <body>
+    
+
+<script type='text/javascript' language='javascript'>
+  function myFunction() {
+    var x = document.getElementById('myTopnav');
+
+    if (x.className === 'topnav') {
+      x.className += ' responsive';
+    } else {
+      x.className = 'topnav';
+    }
+  }
+</script>
+
+<div class='topnav' id='myTopnav'>
+    <a href='index.php'> <!--class='active'>-->Frut</a>
+    <div class="dropdown">
+        <button class="dropbtn">Round Unique<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href='unika.php'>Classic "Omgångsunika"</a>
+            <a href="unika_monthly.php">Monthly toplist</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">Turf Missions<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="mission_events.php">Mission Log</a>
+            <a href="mission_list.php">Mission List</a>
+            <a href="mission.php">Current Mission</a>
+            <a href="mission_help.php">How to Play?</a>
+            <a href="mission_test.php">Experimental...</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">User Stats<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="user.php">User</a>
+            <a href="today.php">Today</a>
+            <a href="2day.php">2day</a>
+            <a href="user_round.php">Round Summary</a>
+            <a href="monthly.php">Monthly</a>
+            <a href="user_unique_ll.php">Unique turfers</a>
+            <a href="user_assists.php">Unique assists</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">Zone Stats<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href='zone.php'>Zone Stats</a>
+            <a href='new_zones.php'>New zones</a>
+            <a href='zone_regtop.php'>Toplist: Zones per region</a>
+            <a href='takestoday.php'>Toplist: Zones taken today</a>
+        </div>
+    </div>
+    <a href='about.php'>About</a>
+    <a href='swish.php'>Donate</a>
+    <a href='settings.php'>Settings</a>
+    <a href='settings.php'>[Welshman]</a>
+    <a href='javascript:void(0);' class='icon' onclick='myFunction()'>
+        <i class='fa fa-bars'></i>
+  </a>
+</div>
+    <div class='main' style='padding-top:8px; padding-left:8px'>
+        <label for='userid'>Turf alias:</label>
+        <input type='text' name='userid' id='userid' onkeydown='if (event.keyCode == 13) return onOkClick(1);' value='Welshman'>
+        <label for='turfdate'>Date:</label>
+        <input type='date' id='turfdate' name='turfdate' min='2017-04-02 max='' value='2021-07-03'>
+        <input type='button' value='OK' onclick='return onOkClick(1);' style='width:60px; height:20px;'>
+        <input type='button' value='<' onclick='return onOkClick(2);' style='width:20px; height:20px;'>
+        <input type='button' value='>' onclick='return onOkClick(3);' style='width:20px; height:20px;'>
+        <input type='button' value='Today' onclick='return onOkClick(4);' style='width:60px; height:20px;'>
+        <br><br>
+
+
+      <table class='miscTable'>
+        <thead>
+          <tr>
+             <th align='left' width='110'>Date (UTC<script>document.write(getUtcOffset());</script>)</th>
+             <th align='left'>Eager time</th>
+             <th width='130' align='left'>Zone name</th>
+             <th width='130' align='left'>Area name</th>
+             <th align='right'>TP</th>
+             <th width='50' style='padding-left:10px' align='left'>PPH</th>
+             <th width='50' align='left'>Activity</th>
+             <th width='150' align='left'>Affected turfer</th>
+             <th>Take</th>
+         </tr>
+       </thead>
+
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 05:58:47'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Britastigen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=138037&roundid=133'>Britastigen</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 06:00:31'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Kvickhuvud'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=138036&roundid=133'>Kvickhuvud</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 06:00:35'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/UskelaChurch'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=62036&roundid=133'>UskelaChurch</a></td>
+	 	    <td align='left'>Salo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Lizt'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Lizt&date=2021-07-03'>Lizt</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:00:23'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Pellonlaita'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=205648&roundid=133'>Pellonlaita</a></td>
+	 	    <td align='left'>Raisio</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:01:27'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Härkädogs'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=204554&roundid=133'>Härkädogs</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:03:12'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MetsäänMeni'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=204556&roundid=133'>MetsäänMeni</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:03:59'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/VTnVieressä'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=204555&roundid=133'>VTnVieressä</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:04:54'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Rahje'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=179508&roundid=133'>Rahje</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:05:48'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Väinölä'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=88353&roundid=133'>Väinölä</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:07:41'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Dikestrand'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=359837&roundid=133'>Dikestrand</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:09:01'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MuhkuriZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=84730&roundid=133'>MuhkuriZone</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:10:45'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Orkola'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=88402&roundid=133'>Orkola</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:15:40'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/IsotalonStart'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=359835&roundid=133'>IsotalonStart</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:16:58'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Leningrad'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=92664&roundid=133'>Leningrad</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:18:37'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Ystävyydenplk'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=134976&roundid=133'>Ystävyydenplk</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:31:25'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/NaantaliSpa'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=61485&roundid=133'>NaantaliSpa</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:35:25'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KurvanIParken'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=175462&roundid=133'>KurvanIParken</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:39:09'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/SheepStroll'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=62327&roundid=133'>SheepStroll</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:45:18'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KavejanBeach'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=62329&roundid=133'>KavejanBeach</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 07:53:13'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/NådendalKyrka'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=61483&roundid=133'>NådendalKyrka</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:00:09'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/MuuminIsle'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=10438&roundid=133'>MuuminIsle</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:06:19'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Sportpark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=63938&roundid=133'>Sportpark</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/RiverSong'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=RiverSong&date=2021-07-03'>RiverSong</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:11:39'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ShoreStreet'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=62328&roundid=133'>ShoreStreet</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:17:29'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/NådenCityPark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=175461&roundid=133'>NådenCityPark</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:22:46'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/NaanTori'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=62330&roundid=133'>NaanTori</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:36:46'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/ToSport'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=175460&roundid=133'>ToSport</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:41:38'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Longleg'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=412959&roundid=133'>Longleg</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:41:59'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Kopparberg'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=90898&roundid=133'>Kopparberg</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:43:11'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/sarvametsä'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=412960&roundid=133'>sarvametsä</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 08:57:33'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Lappalainen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=90897&roundid=133'>Lappalainen</a></td>
+	 	    <td align='left'>Naantali</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 09:10:16'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/AuraHängbron'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=412958&roundid=133'>AuraHängbron</a></td>
+	 	    <td align='left'>Kaarina</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 09:44:50'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KuppisBalls'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=317840&roundid=133'>KuppisBalls</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 09:46:05'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/PoljeLujaa'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=91679&roundid=133'>PoljeLujaa</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 09:47:30'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Mutteri'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=116799&roundid=133'>Mutteri</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 09:48:55'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Rinne'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=95004&roundid=133'>Rinne</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 09:50:41'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/BetweenSoccer'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=63932&roundid=133'>BetweenSoccer</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 10:02:48'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/AdventureZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=10340&roundid=133'>AdventureZone</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 10:04:20'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KupittaaSwim'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=155418&roundid=133'>KupittaaSwim</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>125</td>
+		    <td style='padding-left:10px' align='left'>+5</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 10:05:46'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KupittaaPark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=65479&roundid=133'>KupittaaPark</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 10:29:15'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Utterhällen'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=179467&roundid=133'>Utterhällen</a></td>
+	 	    <td align='left'>Helsinki</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Rogerthat999'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Rogerthat999&date=2021-07-03'>Rogerthat999</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 10:36:24'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/WBridge'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=179466&roundid=133'>WBridge</a></td>
+	 	    <td align='left'>Helsinki</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Rogerthat999'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Rogerthat999&date=2021-07-03'>Rogerthat999</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 12:51:48'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Resina'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=136518&roundid=133'>Resina</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/RiverSong'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=RiverSong&date=2021-07-03'>RiverSong</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 15:52:07'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GnomeRoute'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=227234&roundid=133'>GnomeRoute</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 15:53:44'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Gräsbäcken'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=136121&roundid=133'>Gräsbäcken</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 15:55:08'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Bäcksidan'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=179502&roundid=133'>Bäcksidan</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 15:56:55'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OlarinKirkko'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=61876&roundid=133'>OlarinKirkko</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 16:00:20'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/NorthOfMeri'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=220682&roundid=133'>NorthOfMeri</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 16:05:24'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/WestSubZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=57015&roundid=133'>WestSubZone</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 16:26:45'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/DogParkLuku'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=116865&roundid=133'>DogParkLuku</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 16:28:12'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/LittleDam'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=61877&roundid=133'>LittleDam</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 16:32:48'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/GoingToParola'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=136122&roundid=133'>GoingToParola</a></td>
+	 	    <td align='left'>Espoo</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/WildLynx'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=WildLynx&date=2021-07-03'>WildLynx</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 16:42:31'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/FlemingPark'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=61480&roundid=133'>FlemingPark</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 16:47:53'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KuppisBoule'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=63509&roundid=133'>KuppisBoule</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Kimber'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Kimber&date=2021-07-03'>Kimber</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 16:59:10'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/KirurgiZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=61478&roundid=133'>KirurgiZone</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>140</td>
+		    <td style='padding-left:10px' align='left'>+4</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/Kimber'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=Kimber&date=2021-07-03'>Kimber</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 17:19:33'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Kahvitauko'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=10338&roundid=133'>Kahvitauko</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>155</td>
+		    <td style='padding-left:10px' align='left'>+3</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/joumanzone'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=joumanzone&date=2021-07-03'>joumanzone</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 23:26:59'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/OneEightyZone'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=11144&roundid=133'>OneEightyZone</a></td>
+	 	    <td align='left'>Kaarina</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 23:28:41'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/Saaristo'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=317848&roundid=133'>Saaristo</a></td>
+	 	    <td align='left'>Kaarina</td>
+	 	    <td align='right'>185</td>
+		    <td style='padding-left:10px' align='left'>+1</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 23:55:52'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/EnnenMäki'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=317868&roundid=133'>EnnenMäki</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+          <tr>
+            <td><script language='javascript' type='text/javascript'>document.write(getLocalDate('2021-07-03 23:57:04'));</script></td>
+            <td></td>
+		    <td><a href='https://www.turfgame.com/zone/VoimaTauko'><img height='12' src='images/turf.ico'/></a> <a href='zone.php?zoneid=317869&roundid=133'>VoimaTauko</a></td>
+	 	    <td align='left'>Turku</td>
+	 	    <td align='right'>170</td>
+		    <td style='padding-left:10px' align='left'>+2</td>
+		    <td bgcolor='pink'>Lost</td>
+		    <td><a href='https://www.turfgame.com/user/M0112'><img height='12' src='images/turf.ico'/></a> <a href='today.php?userid=M0112&date=2021-07-03'>M0112</a></td>
+		   <td></td>
+         </tr>
+<tr><td><b>E: 16:54:44</b></td><td><hr></td><td><b>Session Finished!</b></td><td><hr></td><td><hr></td><td><hr></td><td><hr></hr></td><td><hr></td><td><hr></td></tr>          <tr>
+            <th align='left'></th>
+            <th align='left'></th>
+            <th align='left'></th>
+            <th align='left'>Average TP</th>
+            <th align='right'>NAN</th>
+            <th style='padding-left:10px' align='left'></th>
+		    <th align='left'></th>
+            <th align='left'>Zones taken:</th>
+            <th>0</th>
+	    </tr>
+      </table>
+      <br>
+      <table>
+	    <tr><td><b>Assists:</b></td><td>0</td></tr>
+	    <tr><td><b>Revisits:</b></td><td>0</td></tr>
+	    <tr><td><b>Lost:</b></td><td>59</td></tr>
+	    <tr><td><b>Neutralized zones:</b></td><td>0</td></tr>
+	    <tr><td><b>Total takepoints:</b></td><td>0</td></tr>
+	 </table>
+   </div>
+  </body>
+</html>
