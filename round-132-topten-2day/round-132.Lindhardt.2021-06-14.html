@@ -1,0 +1,1985 @@
+
+
+    <html>
+    <link rel='stylesheet' type='text/css' href='frut.css'>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <meta http-equiv='Content-Type' content='text/html;' charset='utf-8'/>
+    <script type='text/javascript' src='jquery.js'></script>
+    <script type='text/javascript' src='https://momentjs.com/downloads/moment-with-locales.min.js'></script>
+    <script language='javascript' type='text/javascript'>
+      function onOkClick(mode)
+      {
+        var date;
+        var newDate = new Date(document.getElementById('turfdate').value);
+        if(mode == 1)
+          date = document.getElementById('turfdate').value;
+        else if(mode == 2) {
+          date = moment(newDate).add(-1, 'days').format('YYYY-MM-DD');
+        } else if(mode == 3) {
+          date = moment(newDate).add(1, 'days').format('YYYY-MM-DD');
+        } else if(mode == 4) {
+          date = '';
+        } else
+          alert('Mode not supported yet :)');
+
+        var dateString = '';
+        if (date != '') {
+          dateString = '&date=' + date;
+        }
+
+        var newLocation = '2day.php?userid=' + userid.value + dateString;
+        window.location.href = newLocation;
+      }
+
+      function getLocalDate(utcDate) {
+        return moment.utc(utcDate).local().format('YYYY-MM-DD HH:mm:ss');
+      }
+
+      function getUtcOffset() {
+        var offset = moment().utcOffset() / 60;
+
+        if (offset > 0)
+          return '+' + offset;
+        else
+          return '-' + offset;
+      }
+    </script>
+    <head>
+        <title>Todays activity</title>
+    </head>
+
+<body>
+
+
+<script type='text/javascript' language='javascript'>
+  function myFunction() {
+    var x = document.getElementById('myTopnav');
+
+    if (x.className === 'topnav') {
+      x.className += ' responsive';
+    } else {
+      x.className = 'topnav';
+    }
+  }
+</script>
+
+<div class='topnav' id='myTopnav'>
+    <a href='index.php'> <!--class='active'>-->Frut</a>
+    <div class="dropdown">
+        <button class="dropbtn">Round Unique<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href='unika.php'>Classic "Omgångsunika"</a>
+            <a href="unika_monthly.php">Monthly toplist</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">Turf Missions<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="mission_events.php">Mission Log</a>
+            <a href="mission_list.php">Mission List</a>
+            <a href="mission.php">Current Mission</a>
+            <a href="mission_help.php">How to Play?</a>
+            <a href="mission_test.php">Experimental...</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">User Stats<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="user.php">User</a>
+            <a href="today.php">Today</a>
+            <a href="2day.php">2day</a>
+            <a href="user_round.php">Round Summary</a>
+            <a href="monthly.php">Monthly</a>
+            <a href="user_unique_ll.php">Unique turfers</a>
+            <a href="user_assists.php">Unique assists</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">Zone Stats<i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href='zone.php'>Zone Stats</a>
+            <a href='new_zones.php'>New zones</a>
+            <a href='zone_regtop.php'>Toplist: Zones per region</a>
+            <a href='takestoday.php'>Toplist: Zones taken today</a>
+        </div>
+    </div>
+    <a href='about.php'>About</a>
+    <a href='swish.php'>Donate</a>
+    <a href='settings.php'>Settings</a>
+    <a href='settings.php'>[Lindhardt]</a>
+    <a href='javascript:void(0);' class='icon' onclick='myFunction()'>
+        <i class='fa fa-bars'></i>
+  </a>
+</div>
+<div class='main' style='padding-top:8px; padding-left:8px'>
+    <label for='userid'>Turf alias:</label>
+    <input type='text' name='userid' id='userid' onkeydown='if (event.keyCode == 13) return onOkClick(1);' value='Lindhardt'>
+    <label for='turfdate'>Date:</label>
+    <input type='date' id='turfdate' name='turfdate' min='2017-04-02 max='2021-07-18' value='2021-06-14'>
+    <input type='button' value='OK' onclick='return onOkClick(1);' style='width:60px; height:20px;'>
+    <input type='button' value='<' onclick='return onOkClick(2);' style='width:20px; height:20px;'>
+    <input type='button' value='>' onclick='return onOkClick(3);' style='width:20px; height:20px;'>
+    <input type='button' value='Today' onclick='return onOkClick(4);' style='width:60px; height:20px;'>
+    <br><br>
+
+
+<table class='miscTable'>        <thead>
+        <tr>
+            <th align='right' width='30'>Id</th>
+            <th width='60' align='left'>Time</th>
+            <th width='60' align='left'>Duration</th>
+            <th width='40' align='right'>Zones</th>
+            <th width='40' align='right'>Points&nbsp;total</th>
+            <th width='40' align='right'>Points&nbsp;tp</th>
+            <th width='40' align='right'>Points&nbsp;pph</th>
+            <th width='40' align='right'>Takeovers</th>
+            <th width='40' align='right'>Assists</th>
+            <th width='40' align='right'>Revisits</th>
+            <th width='40' align='right'>Neutralized</th>
+        </tr>
+        </thead>
+                    <tr>
+                <td align="right">1</td>
+                <td align="right"><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 04:51:58')).format('HH:mm:ss'));</script></td>
+                <td align="right">13:44:09</td>
+                <td align="right">104</td>
+                <td align="right">37130</td>
+                <td align="right">16720</td>
+                <td align="right">20410</td>
+                <td align="right">104</td>
+                <td align="right">0</td>
+                <td align="right">0</td>
+                <td align="right">28</td>
+            </tr>
+
+                <thead>
+        <tr>
+            <th align='right' width='30'>1</th>
+            <th width='60' align='right'></th>
+            <th width='60' align='right'></th>
+            <th width='40' align='right'>104</th>
+            <th width='40' align='right'>37130</th>
+            <th width='40' align='right'></th>
+            <th width='40' align='right'></th>
+            <th width='40' align='right'>104</th>
+            <th width='40' align='right'>0</th>
+            <th width='40' align='right'>0</th>
+            <th width='40' align='right'>28</th>
+        </tr>
+        </thead>
+        </table><br><br><b>Session: 1</b><br><table class='miscTable'>            <thead>
+                <tr>
+                    <th align='left' width='170'>Date&nbsp;(Timezone:&nbsp;UTC<script>document.write(getUtcOffset());</script>)</th>
+                    <th width='50' align='left'>Eager</th>
+                    <th width='15' align='left'></th> <!-- Turf link -->
+                    <th width='130' align='left'>Zone&nbsp;name</th>
+                    <th width='160' align='left'>Area&nbsp;name</th>
+                    <th width='50' align='right'>TP</th>
+                    <th width='50' style='padding-left:10px' align='right'>PPH</th>
+                    <th width='50' align='left'>Activity</th>
+                    <th width='50' align='left'>Points</th>
+                    <th width='120' align='right'>Duration</th>
+                    <th width='15' align='left'></th> <!-- Turf link -->
+                    <th width='110' align='left'>Taken&nbsp;from</th>
+                    <th width='15' align='left'></th> <!-- Turf link -->
+                    <th width='110' align='left'>Lost&nbsp;to</th>
+                    <th>Take</th>
+                    <th>Acc</th>
+               </tr>
+            </thead>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 04:51:58')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Påskberget'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=27624&roundid=132'>Påskberget</a></td>
+                <td align='left'>Göteborgs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>265</td>
+                <td align='right'>1&nbsp;days&nbsp;12:46:05</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Dadeee'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Dadeee&date=2021-06-14'>Dadeee</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Dadeee'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Dadeee&date=2021-06-14'>Dadeee</a></td>
+                <td align='left'>1</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 05:09:38')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/SandsjöbackaV'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=177434&roundid=132'>SandsjöbackaV</a></td>
+                <td align='left'>Mölndals&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>297</td>
+                <td align='right'>1&nbsp;days&nbsp;23:10:33</td>
+                <td align='right'><a href='https://www.turfgame.com/user/RunBMB'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=RunBMB&date=2021-06-14'>RunBMB</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/pactanghag'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=pactanghag&date=2021-06-14'>pactanghag</a></td>
+                <td align='left'>2</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 05:25:22')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Ölmevallasjön'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=154661&roundid=132'>Ölmevallasjön</a></td>
+                <td align='left'>Kungsbacka&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>257</td>
+                <td align='right'>1&nbsp;days&nbsp;09:52:15</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Ventruce'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Ventruce&date=2021-06-14'>Ventruce</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Ventruce'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Ventruce&date=2021-06-14'>Ventruce</a></td>
+                <td align='left'>3</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 05:34:44')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/SintorpsÄngar'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=396780&roundid=132'>SintorpsÄngar</a></td>
+                <td align='left'>Kungsbacka&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>228</td>
+                <td align='right'>1&nbsp;days&nbsp;00:28:14</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Ventruce'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Ventruce&date=2021-06-14'>Ventruce</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Ventruce'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Ventruce&date=2021-06-14'>Ventruce</a></td>
+                <td align='left'>4</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 05:55:03')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/LindbergZone'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=44750&roundid=132'>LindbergZone</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>669</td>
+                <td align='right'>20&nbsp;days&nbsp;04:04:57</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Newbeetle'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Newbeetle&date=2021-06-14'>Newbeetle</a></td>
+                <td align='right'></td><td></td>
+                <td align='left'>5</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 06:09:51')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Fönsterrosen'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=319237&roundid=132'>Fönsterrosen</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>669</td>
+                <td align='right'>20&nbsp;days&nbsp;03:50:09</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'></td><td></td>
+                <td align='left'>6</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 06:23:52')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/TalandeStenar'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=56021&roundid=132'>TalandeStenar</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>719</td>
+                <td align='right'>20&nbsp;days&nbsp;03:36:08</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>7</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 06:53:07')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Grimeton'><img height='16' src='https://turfgame.com/images/zonetypes/15.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=47774&roundid=132'>Grimeton</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>198</td>
+                <td align='right'>13:05:32</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Eto'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Eto&date=2021-06-14'>Eto</a></td>
+                <td align='left'>8</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 07:04:56')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right"></td>
+                <td align="right"><a href='https://www.turfgame.com/zone/BroåsenRing'><img height='16' src='https://turfgame.com/images/zonetypes/16.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=56018&roundid=132'>BroåsenRing</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>668</td>
+                <td align='right'>20&nbsp;days&nbsp;02:55:04</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'></td><td></td>
+                <td align='left'>9</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 07:15:40')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">143:42</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/KorsgataGrav'><img height='16' src='https://turfgame.com/images/zonetypes/16.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=316573&roundid=132'>KorsgataGrav</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>236</td>
+                <td align='right'>2&nbsp;days&nbsp;03:26:34</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='left'>10</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 07:21:02')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">131:24</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/HämtaAndan'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=412467&roundid=132'>HämtaAndan</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>211</td>
+                <td align='right'>1&nbsp;days&nbsp;02:01:21</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>11</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 07:24:50')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">119:28</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/DeDödasteGård'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=412468&roundid=132'>DeDödasteGård</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>211</td>
+                <td align='right'>1&nbsp;days&nbsp;01:53:03</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>12</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 07:32:32')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">117:48</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/HappyTrees'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=374440&roundid=132'>HappyTrees</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>161</td>
+                <td align='right'>05:11:46</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>13</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 07:41:58')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">106:55</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Moorlands'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=79013&roundid=132'>Moorlands</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>170</td>
+                <td align='right'>+2</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>221</td>
+                <td align='right'>1&nbsp;days&nbsp;01:15:51</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>14</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 07:43:58')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">94:07</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/HinderFörHäst'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=412469&roundid=132'>HinderFörHäst</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>170</td>
+                <td align='right'>+2</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>221</td>
+                <td align='right'>1&nbsp;days&nbsp;01:16:19</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>15</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 07:51:34')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">87:42</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/VindIHåret'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=412470&roundid=132'>VindIHåret</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>210</td>
+                <td align='right'>1&nbsp;days&nbsp;00:32:09</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Newbeetle'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Newbeetle&date=2021-06-14'>Newbeetle</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>16</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:02:32')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">69:25</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/SocietyPark'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=5333&roundid=132'>SocietyPark</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>110</td>
+                <td align='right'>+6</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>126</td>
+                <td align='right'>02:38:57</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>17</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:03:57')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">59:01</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Grenåkaj'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=79011&roundid=132'>Grenåkaj</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>138</td>
+                <td align='right'>02:35:49</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>18</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:05:31')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">49:51</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/KallMahal'><img height='16' src='https://turfgame.com/images/zonetypes/8.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=896&roundid=132'>KallMahal</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>110</td>
+                <td align='right'>+6</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>125</td>
+                <td align='right'>02:32:51</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>19</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:06:42')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">45:40</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/PusOcean'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=1368&roundid=132'>PusOcean</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>110</td>
+                <td align='right'>+6</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>125</td>
+                <td align='right'>02:29:55</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>20</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:08:05')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">43:15</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Pirkul'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=374494&roundid=132'>Pirkul</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>255</td>
+                <td align='right'>1&nbsp;days&nbsp;04:42:28</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Newbeetle'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Newbeetle&date=2021-06-14'>Newbeetle</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>21</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:10:31')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">37:59</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/KatteWalk'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=90543&roundid=132'>KatteWalk</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>110</td>
+                <td align='right'>+6</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>124</td>
+                <td align='right'>02:24:58</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>22</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:12:35')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">30:37</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/NearNudeZone'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=21792&roundid=132'>NearNudeZone</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>137</td>
+                <td align='right'>02:19:46</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>23</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:13:54')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">29:56</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/LoveJuice'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=224405&roundid=132'>LoveJuice</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>136</td>
+                <td align='right'>02:17:14</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>24</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:16:02')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">24:28</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/PusBeach'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=1195&roundid=132'>PusBeach</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>241</td>
+                <td align='right'>1&nbsp;days&nbsp;04:44:10</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>25</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:18:58')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">16:26</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Bandholtz'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=18063&roundid=132'>Bandholtz</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>149</td>
+                <td align='right'>02:09:01</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>26</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:21:17')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">17:20</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/BlankasPlats'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=1367&roundid=132'>BlankasPlats</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>234</td>
+                <td align='right'>23:25:27</td>
+                <td align='right'><a href='https://www.turfgame.com/user/sumo'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=sumo&date=2021-06-14'>sumo</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>27</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:23:22')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">17:51</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Påskfältet'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=21794&roundid=132'>Påskfältet</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>241</td>
+                <td align='right'>1&nbsp;days&nbsp;04:48:54</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>28</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:25:37')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">18:55</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/EasterMount'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=1198&roundid=132'>EasterMount</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>241</td>
+                <td align='right'>23:17:21</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>29</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:27:24')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">19:19</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Cyk'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=194308&roundid=132'>Cyk</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>252</td>
+                <td align='right'>1&nbsp;days&nbsp;03:56:44</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>30</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:29:38')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">19:07</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/VarbergHigh'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=26955&roundid=132'>VarbergHigh</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>153</td>
+                <td align='right'>03:15:15</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>31</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:30:36')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">18:01</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/TrananSouth'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=33010&roundid=132'>TrananSouth</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>153</td>
+                <td align='right'>03:13:03</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>32</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:32:24')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">18:30</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/PedersEntré'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=26958&roundid=132'>PedersEntré</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>153</td>
+                <td align='right'>03:09:24</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>33</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:34:12')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">18:10</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/DeerRobberyRd'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=33013&roundid=132'>DeerRobberyRd</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>152</td>
+                <td align='right'>03:05:43</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>34</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:36:07')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">17:09</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Handelsgatan'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=76617&roundid=132'>Handelsgatan</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>152</td>
+                <td align='right'>03:02:24</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>35</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:38:01')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">16:44</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Cornflower'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=25940&roundid=132'>Cornflower</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>163</td>
+                <td align='right'>05:39:52</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='left'>36</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:40:48')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">17:26</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Hepatica'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=24036&roundid=132'>Hepatica</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>164</td>
+                <td align='right'>02:54:47</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>37</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:41:58')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">16:21</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/EastPus'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=1200&roundid=132'>EastPus</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>151</td>
+                <td align='right'>02:52:10</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>38</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:42:58')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:34</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Solrosens'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=24035&roundid=132'>Solrosens</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>151</td>
+                <td align='right'>02:48:16</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>39</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:44:15')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">14:37</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/HopplaGalopp'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=63863&roundid=132'>HopplaGalopp</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>163</td>
+                <td align='right'>02:45:27</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>40</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:46:18')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:42</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/HooStone'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=63864&roundid=132'>HooStone</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>155</td>
+                <td align='right'>03:52:27</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>41</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:47:42')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:18</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/BragesGränd'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=28657&roundid=132'>BragesGränd</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>166</td>
+                <td align='right'>03:49:07</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>42</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:49:34')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:22</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/MimersField'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=50260&roundid=132'>MimersField</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>162</td>
+                <td align='right'>02:28:49</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>43</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:51:08')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:01</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/VemsHammare'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=355178&roundid=132'>VemsHammare</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>162</td>
+                <td align='right'>02:25:26</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>44</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:53:45')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:44</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/ThePlätt'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=63859&roundid=132'>ThePlätt</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>149</td>
+                <td align='right'>02:20:43</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>45</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:55:10')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">14:22</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Trädlyckan'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=26956&roundid=132'>Trädlyckan</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>149</td>
+                <td align='right'>02:17:12</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>46</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:57:12')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:14</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/UnderMagasin'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=28798&roundid=132'>UnderMagasin</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>149</td>
+                <td align='right'>02:12:45</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>47</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:58:18')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:20</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/WestCozyZone'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=33008&roundid=132'>WestCozyZone</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>149</td>
+                <td align='right'>02:10:33</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>48</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 08:59:32')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:17</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Brunnsgränd'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=26964&roundid=132'>Brunnsgränd</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>161</td>
+                <td align='right'>02:07:55</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>49</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:01:11')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">14:53</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Brunnsberg'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=26963&roundid=132'>Brunnsberg</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>161</td>
+                <td align='right'>02:04:24</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>50</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:02:37')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">14:55</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/VidHajen'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=28797&roundid=132'>VidHajen</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>148</td>
+                <td align='right'>02:00:59</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>51</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:04:09')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">14:35</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/FlabbarBirger'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=76613&roundid=132'>FlabbarBirger</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>161</td>
+                <td align='right'>01:57:54</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Doggybaglady'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Doggybaglady&date=2021-06-14'>Doggybaglady</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>52</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:05:30')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">14:22</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Getkyrkruinen'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=11150&roundid=132'>Getkyrkruinen</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>148</td>
+                <td align='right'>01:53:58</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Hafs57'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Hafs57&date=2021-06-14'>Hafs57</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>53</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:07:40')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">13:55</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/LuckyTree'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=898&roundid=132'>LuckyTree</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>134</td>
+                <td align='right'>01:48:28</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>54</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:09:35')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">14:25</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/ParkOnGravel'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=50261&roundid=132'>ParkOnGravel</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>134</td>
+                <td align='right'>01:43:59</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Doggybaglady'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Doggybaglady&date=2021-06-14'>Doggybaglady</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>55</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='yellow'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:11:01')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">13:49</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/VallStreet'><img height='16' src='https://turfgame.com/images/zonetypes/13.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=1361&roundid=132'>VallStreet</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>250</td>
+                <td align='right'>1&nbsp;days&nbsp;03:28:03</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Doggybaglady'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Doggybaglady&date=2021-06-14'>Doggybaglady</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>56</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:13:09')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">14:51</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/EngelPark'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=18066&roundid=132'>EngelPark</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>133</td>
+                <td align='right'>01:38:17</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Hafs57'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Hafs57&date=2021-06-14'>Hafs57</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>57</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:15:19')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">15:47</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/VarbergGraves'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=5334&roundid=132'>VarbergGraves</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>133</td>
+                <td align='right'>01:32:48</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Hafs57'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Hafs57&date=2021-06-14'>Hafs57</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>58</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:19:25')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">18:14</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Hantverkzon'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=63858&roundid=132'>Hantverkzon</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>222</td>
+                <td align='right'>22:25:10</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>59</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:21:21')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">18:44</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/HästPåGubbe'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=18064&roundid=132'>HästPåGubbe</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>125</td>
+                <td align='right'>+5</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>237</td>
+                <td align='right'>22:27:03</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>60</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 09:23:11')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">19:02</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/BigTorg'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=897&roundid=132'>BigTorg</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>110</td>
+                <td align='right'>+6</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>118</td>
+                <td align='right'>01:22:20</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Hafs57'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Hafs57&date=2021-06-14'>Hafs57</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>61</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 10:03:31')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">58:01</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/EngelskaPark'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=21791&roundid=132'>EngelskaPark</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>110</td>
+                <td align='right'>+6</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>114</td>
+                <td align='right'>00:39:41</td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/clofen'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=clofen&date=2021-06-14'>clofen</a></td>
+                <td align='left'>62</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 10:22:29')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">74:49</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Brearedskogen'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=374493&roundid=132'>Brearedskogen</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>158</td>
+                <td align='right'>00:52:02</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>63</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 10:31:47')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">82:12</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Fritidskappan'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=349670&roundid=132'>Fritidskappan</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>140</td>
+                <td align='right'>+4</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>142</td>
+                <td align='right'>00:35:27</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Anor64'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Anor64&date=2021-06-14'>Anor64</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Satsang'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Satsang&date=2021-06-14'>Satsang</a></td>
+                <td align='left'>64</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 10:34:28')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">83:27</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/SomeDaySoon'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=182112&roundid=132'>SomeDaySoon</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>155</td>
+                <td align='right'>+3</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>158</td>
+                <td align='right'>00:55:14</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Satsang'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Satsang&date=2021-06-14'>Satsang</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='left'>65</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 10:47:15')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">94:06</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/TvåIF'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=91533&roundid=132'>TvåIF</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>207</td>
+                <td align='right'>21:41:46</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Anor64'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Anor64&date=2021-06-14'>Anor64</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>66</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 10:50:57')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">95:38</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/TvåZone'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=43068&roundid=132'>TvåZone</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>207</td>
+                <td align='right'>22:18:39</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Anor64'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Anor64&date=2021-06-14'>Anor64</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>67</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 10:54:00')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">94:35</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/TvååkerKyrka'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=61082&roundid=132'>TvååkerKyrka</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>207</td>
+                <td align='right'>22:13:24</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Anor64'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Anor64&date=2021-06-14'>Anor64</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>68</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 10:57:48')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">96:27</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/BortomLönnen'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=317022&roundid=132'>BortomLönnen</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>257</td>
+                <td align='right'>22:06:38</td>
+                <td align='right'></td><td></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>69</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 11:04:16')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">101:05</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/DoubleCare'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=143526&roundid=132'>DoubleCare</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>207</td>
+                <td align='right'>21:41:37</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Anor64'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Anor64&date=2021-06-14'>Anor64</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>70</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 11:17:51')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">74:20</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Höråstoppen'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=347988&roundid=132'>Höråstoppen</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>257</td>
+                <td align='right'>21:37:00</td>
+                <td align='right'></td><td></td>
+                <td align='right'><a href='https://www.turfgame.com/user/OldKing'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=OldKing&date=2021-06-14'>OldKing</a></td>
+                <td align='left'>71</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 11:41:09')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">78:40</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Hiaklitten'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=318295&roundid=132'>Hiaklitten</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>713</td>
+                <td align='right'>19&nbsp;days&nbsp;22:18:51</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>72</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 12:00:12')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">88:25</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Bockstensman'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=323823&roundid=132'>Bockstensman</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>640</td>
+                <td align='right'>18&nbsp;days&nbsp;22:37:07</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Serra'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Serra&date=2021-06-14'>Serra</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Deneva'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Deneva&date=2021-06-14'>Deneva</a></td>
+                <td align='left'>73</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 12:08:03')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">93:35</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Åkulla'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=221145&roundid=132'>Åkulla</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>639</td>
+                <td align='right'>18&nbsp;days&nbsp;21:59:56</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Serra'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Serra&date=2021-06-14'>Serra</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Häxvrål'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Häxvrål&date=2021-06-14'>Häxvrål</a></td>
+                <td align='left'>74</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 12:29:59')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">102:44</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Prosit'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=348106&roundid=132'>Prosit</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>712</td>
+                <td align='right'>19&nbsp;days&nbsp;21:30:01</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>75</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 12:56:14')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">125:17</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/VilkenFävr'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=323824&roundid=132'>VilkenFävr</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>712</td>
+                <td align='right'>19&nbsp;days&nbsp;21:03:46</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>76</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 13:18:26')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">144:26</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Agnbäck'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=346465&roundid=132'>Agnbäck</a></td>
+                <td align='left'>Varbergs&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>712</td>
+                <td align='right'>19&nbsp;days&nbsp;20:41:34</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>77</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 13:44:06')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">166:18</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/HurDå'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=346463&roundid=132'>HurDå</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>711</td>
+                <td align='right'>19&nbsp;days&nbsp;20:15:54</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>78</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 14:10:52')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">186:36</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/SjuStrömmar'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=56985&roundid=132'>SjuStrömmar</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>711</td>
+                <td align='right'>19&nbsp;days&nbsp;19:49:08</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>79</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 14:28:08')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">190:17</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/SeatonsBorg'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=60195&roundid=132'>SeatonsBorg</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>711</td>
+                <td align='right'>19&nbsp;days&nbsp;19:31:52</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>80</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 14:49:04')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">187:55</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/ÄlekullaKyrka'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=226806&roundid=132'>ÄlekullaKyrka</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>710</td>
+                <td align='right'>19&nbsp;days&nbsp;19:10:56</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>81</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 15:06:58')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">186:46</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Inganäs'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=326169&roundid=132'>Inganäs</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>710</td>
+                <td align='right'>19&nbsp;days&nbsp;18:53:02</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>82</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 15:12:37')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">184:34</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/MjöbäcksKyrka'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=62276&roundid=132'>MjöbäcksKyrka</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>710</td>
+                <td align='right'>19&nbsp;days&nbsp;18:47:23</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>83</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 15:26:25')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">176:26</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Prekebogumman'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=57062&roundid=132'>Prekebogumman</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>710</td>
+                <td align='right'>19&nbsp;days&nbsp;18:33:35</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>84</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 15:38:30')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">162:16</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/KullabergClub'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=221186&roundid=132'>KullabergClub</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>709</td>
+                <td align='right'>19&nbsp;days&nbsp;18:21:30</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>85</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 15:42:13')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">143:47</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/ÖverlidaKyrka'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=156620&roundid=132'>ÖverlidaKyrka</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>709</td>
+                <td align='right'>19&nbsp;days&nbsp;18:17:47</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>86</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 15:53:38')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">129:32</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Överlidabad'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=96028&roundid=132'>Överlidabad</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>709</td>
+                <td align='right'>19&nbsp;days&nbsp;18:06:22</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>87</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 16:05:31')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">114:39</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/GräneGruva'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=57176&roundid=132'>GräneGruva</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>566</td>
+                <td align='right'>13&nbsp;days&nbsp;18:49:18</td>
+                <td align='right'></td><td></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Whyres'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Whyres&date=2021-06-14'>Whyres</a></td>
+                <td align='left'>88</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 16:17:10')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">109:02</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Fäxhult'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=326162&roundid=132'>Fäxhult</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>709</td>
+                <td align='right'>19&nbsp;days&nbsp;17:42:50</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>89</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 16:22:58')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">93:54</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Holsljunga'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=154779&roundid=132'>Holsljunga</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>709</td>
+                <td align='right'>19&nbsp;days&nbsp;17:37:02</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>90</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 16:27:00')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">80:02</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Holsjunga'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=97198&roundid=132'>Holsjunga</a></td>
+                <td align='left'>Svenljunga&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>709</td>
+                <td align='right'>19&nbsp;days&nbsp;17:33:00</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>91</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 16:41:03')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">88:26</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/ÖxabäcksKyrka'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=62279&roundid=132'>ÖxabäcksKyrka</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>708</td>
+                <td align='right'>19&nbsp;days&nbsp;17:18:57</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>92</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 16:43:56')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">77:31</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/ÖxabäckBad'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=154573&roundid=132'>ÖxabäckBad</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>708</td>
+                <td align='right'>19&nbsp;days&nbsp;17:16:04</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>93</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 16:50:37')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">72:07</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Brokvarn'><img height='16' src='https://turfgame.com/images/zonetypes/8.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=57177&roundid=132'>Brokvarn</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>708</td>
+                <td align='right'>19&nbsp;days&nbsp;17:09:23</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>94</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 17:04:50')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">82:37</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Hanatorp'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=221150&roundid=132'>Hanatorp</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>658</td>
+                <td align='right'>19&nbsp;days&nbsp;16:55:10</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'></td><td></td>
+                <td align='left'>95</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 17:12:36')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">78:58</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Hanatorpfågel'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=412434&roundid=132'>Hanatorpfågel</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>658</td>
+                <td align='right'>19&nbsp;days&nbsp;16:47:24</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='right'></td><td></td>
+                <td align='left'>96</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 17:28:35')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">83:04</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/SvenasjöKyrka'><img height='16' src='https://turfgame.com/images/zonetypes/9.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=221162&roundid=132'>SvenasjöKyrka</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>708</td>
+                <td align='right'>19&nbsp;days&nbsp;16:31:25</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>97</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 17:34:51')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">77:41</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Gunnbofallet'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=226805&roundid=132'>Gunnbofallet</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>707</td>
+                <td align='right'>19&nbsp;days&nbsp;16:25:09</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>98</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 17:43:00')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">80:02</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/SistaHålet'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=412436&roundid=132'>SistaHålet</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>657</td>
+                <td align='right'>19&nbsp;days&nbsp;16:17:00</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Tanån'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Tanån&date=2021-06-14'>Tanån</a></td>
+                <td align='right'></td><td></td>
+                <td align='left'>99</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 17:46:24')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">79:24</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Brotäckt'><img height='16' src='https://turfgame.com/images/zonetypes/8.png' class='zone_attribute_image' /></a></td>
+                <td><a href='zone.php?zoneid=318526&roundid=132'>Brotäckt</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>707</td>
+                <td align='right'>19&nbsp;days&nbsp;16:13:36</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>100</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 17:52:50')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">71:47</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/HeDejDennaVej'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=412435&roundid=132'>HeDejDennaVej</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>657</td>
+                <td align='right'>19&nbsp;days&nbsp;16:07:10</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'></td><td></td>
+                <td align='left'>101</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 17:57:11')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">73:15</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Häggån'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=154660&roundid=132'>Häggån</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>224</td>
+                <td align='right'>1&nbsp;days&nbsp;14:45:19</td>
+                <td align='right'><a href='https://www.turfgame.com/user/greenlander'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=greenlander&date=2021-06-14'>greenlander</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/eleKtroFish'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=eleKtroFish&date=2021-06-14'>eleKtroFish</a></td>
+                <td align='left'>102</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 18:17:30')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">86:53</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/LocköKvarn'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=387220&roundid=132'>LocköKvarn</a></td>
+                <td align='left'>Marks&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='yellow'>Takeover</td>
+                <td align='right'>707</td>
+                <td align='right'>19&nbsp;days&nbsp;15:42:30</td>
+                <td align='right'></td><td></td>
+                <td align='right'></td><td></td>
+                <td align='left'>103</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                    <tr> <!-- bgcolor='white'> -->
+                <td><script language='javascript' type='text/javascript'>document.write(moment(getLocalDate('2021-06-14 18:36:07')).format('YYYY-MM-DD HH:mm:ss'));</script></td>
+                <td align="right">91:17</td>
+                <td align="right"><a href='https://www.turfgame.com/zone/Övattnet'><img height='16' src='images/turf.ico'/></a></td>
+                <td><a href='zone.php?zoneid=325660&roundid=132'>Övattnet</a></td>
+                <td align='left'>Härryda&nbsp;kommun</td>
+                <td align='right'>185</td>
+                <td align='right'>+1</td>
+                <td bgcolor='lightgreen'>Takeover</td>
+                <td align='right'>587</td>
+                <td align='right'>16&nbsp;days&nbsp;17:57:08</td>
+                <td align='right'><a href='https://www.turfgame.com/user/Qwicke'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Qwicke&date=2021-06-14'>Qwicke</a></td>
+                <td align='right'><a href='https://www.turfgame.com/user/Serra'><img height='12' src='images/turf.ico'/></a></td><td bgcolor='white' align='left'><a href='2day.php?userid=Serra&date=2021-06-14'>Serra</a></td>
+                <td align='left'>104</td>
+                <td align='left'></td>
+                <!--<td></td>-->
+            </tr>
+                <tfoot>
+        <tr>
+            <th align='left' width='170'>Elapsed: 810:05:07</th>
+            <th align='left'></th>
+            <th width='15' align='left'></th> <!-- Turf link -->
+            <th width='130' align='left'></th>
+            <th width='160' align='left'></th>
+            <th align='right'>16720</th>
+            <th width='50' style='padding-left:10px' align='right'>+2.6</th>
+            <th width='50' align='left'></th>
+            <th width='50' align='right'>37130</th>
+            <th width='120' align='right'></th>
+            <th width='15' align='left'></th> <!-- Turf link -->
+            <th width='110' align='left'></th>
+            <th width='15' align='left'></th> <!-- Turf link -->
+            <th width='110' align='left'></th>
+            <th></th>
+            <th></th>
+        </tr>
+        </tfoot>
+        </table></br></br>    </div>
+    </body>
+    </html>
